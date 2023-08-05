@@ -1,0 +1,14 @@
+.element__description{
+  display: flex;
+  justify-content: space-between;
+  max-width: 246px;
+  align-items: center;
+  padding: 25px 20px 26px 21px;
+}
+
+@media screen and (max-width: 880px) {
+  .elements__description {
+    padding-right: 15px;
+    padding-bottom: 31px;
+  }
+}

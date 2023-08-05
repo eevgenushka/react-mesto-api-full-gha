@@ -1,0 +1,9 @@
+.header__box {
+    display: flex;
+}
+
+@media screen and (max-width: 550px) {
+    .header__box {    
+      flex-direction: column;
+    }
+  }

@@ -17,8 +17,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "npm run build &&  scp -r ./build/* eevgenushka@51.250.70.228:/home/eevgenushka/frontend" 
   },
   "homepage": "https://eevgenushka.github.io/react-mesto-auth/",
   "eslintConfig": {

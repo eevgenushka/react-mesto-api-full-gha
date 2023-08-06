@@ -16,6 +16,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 });
 app.use(requestLogger);
 app.use(cors({ origin: "http://localhost:3000", credentials: true,}));
+require('dotenv').config();
 app.use('/', express.json());
 app.use('/users', auth, require('./routes/users'));
 app.use('/cards', auth, require('./routes/cards'));
@@ -48,5 +49,5 @@ app.use(errorLogger);
 app.use(errors());
 app.use(ErrorHandler);
 app.listen(PORT, () => {
-  console.log('Сервер запущен');
+  console.log(PORT);
 });

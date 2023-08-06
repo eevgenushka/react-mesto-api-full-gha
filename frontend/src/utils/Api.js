@@ -77,7 +77,7 @@
 }
 
 const api = new Api({
-	url: "http://localhost:4000",
+	url: "http://api.eevgenushka.nomoreparties.co/",
 	headers: {
 		'authorization': `Bearer ${localStorage.getItem('jwt')}`,
 		'Content-Type': 'application/json'

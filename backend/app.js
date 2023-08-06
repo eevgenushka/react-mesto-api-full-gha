@@ -15,7 +15,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 app.use(requestLogger);
-app.use(cors({ origin: "http://localhost:3000", credentials: true,}));
+app.use(cors({ origin: ["http://localhost:3000", "https://eevgenushka.nomoreparties.co"], credentials: true,}));
 require('dotenv').config();
 app.use('/', express.json());
 app.use('/users', auth, require('./routes/users'));

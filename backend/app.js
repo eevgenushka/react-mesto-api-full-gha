@@ -7,7 +7,7 @@ const NotFoundError = require('./errors/NotFoundError');
 const { createUser, login } = require('./controllers/users');
 const { requestLogger, errorLogger } = require ('./middlewares/logger.js');
 const cors = require('cors');
-const { PORT = 4000 } = process.env;
+const { PORT = 3000 } = process.env;
 
 const app = express();
 
@@ -15,7 +15,11 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 app.use(requestLogger);
-app.use(cors({ origin: ["http://localhost:3000", "https://eevgenushka.nomoreparties.co"], credentials: true,}));
+app.use(cors({
+  origin: [
+    'http://localhost:3001',
+    'https://eevgenushka.nomoreparties.co'],
+}));
 require('dotenv').config();
 app.use('/', express.json());
 app.use('/users', auth, require('./routes/users'));

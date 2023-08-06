@@ -11,24 +11,27 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 require('dotenv').config();
 
-const { PORT = 3001 } = process.env;
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
+
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://eevgenushka.nomoreparties.co',
+    'https://api.eevgenushka.nomoreparties.co'],
+}));
+
 app.use(requestLogger);
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
-app.use(cors({
-  origin: [
-    'http://localhost:3001',
-    'https://eevgenushka.nomoreparties.co'],
-}));
 
 app.use('/', express.json());
 app.use('/users', auth, require('./routes/users'));

@@ -22,7 +22,7 @@ const createCard = (req, res, next) => {
 const getCards = (req, res, next) => {
   Cards.find({})
     .then((cards) => {
-      res.send( cards );
+      res.send(cards);
     })
     .catch(next);
 };

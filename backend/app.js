@@ -1,12 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
+const cors = require('cors');
 const auth = require('./middlewares/auth');
 const ErrorHandler = require('./errors/ErrorHandler');
 const NotFoundError = require('./errors/NotFoundError');
 const { createUser, login } = require('./controllers/users');
-const { requestLogger, errorLogger } = require ('./middlewares/logger.js');
-const cors = require('cors');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+
+require('dotenv').config();
+
 const { PORT = 3000 } = process.env;
 
 const app = express();
@@ -20,7 +23,7 @@ app.use(cors({
     'http://localhost:3001',
     'https://eevgenushka.nomoreparties.co'],
 }));
-require('dotenv').config();
+
 app.use('/', express.json());
 app.use('/users', auth, require('./routes/users'));
 app.use('/cards', auth, require('./routes/cards'));

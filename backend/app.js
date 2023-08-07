@@ -9,7 +9,7 @@ const NotFoundError = require('./errors/NotFoundError');
 const { createUser, login } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
-const { PORT = 4000 } = process.env;
+const { PORT = 3001 } = process.env;
 
 const app = express();
 

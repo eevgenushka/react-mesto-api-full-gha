@@ -1,4 +1,4 @@
-export const BASE_URL = "https://api.eevgenushka.nomoreparties.co";
+export const BASE_URL = "http://localhost:4000";
 
 function checkResponse(res) {
   if (res.ok) {

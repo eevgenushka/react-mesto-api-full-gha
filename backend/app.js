@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
@@ -9,9 +9,7 @@ const NotFoundError = require('./errors/NotFoundError');
 const { createUser, login } = require('./controllers/users');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
-require('dotenv').config();
-
-const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
+const { PORT = 4000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
 const app = express();
 
@@ -21,9 +19,7 @@ mongoose.connect(DB_URL, {
 
 app.use(cors({
   origin: [
-    'http://localhost:3000',
-    'https://eevgenushka.nomoreparties.co',
-    'https://api.eevgenushka.nomoreparties.co'],
+    'http://localhost:3000'],
 }));
 
 app.use(requestLogger);

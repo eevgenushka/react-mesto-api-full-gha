@@ -20,7 +20,6 @@
     "eject": "react-scripts eject",
     "deploy": "npm run build &&  scp -r ./build/* eevgenushka@51.250.70.228:/home/eevgenushka/frontend"
   },
-  "homepage": "https://eevgenushka.github.io/react-mesto-auth/",
   "eslintConfig": {
     "extends": [
       "react-app",

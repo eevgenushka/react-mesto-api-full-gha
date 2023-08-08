@@ -9,7 +9,7 @@
 
 ## Ссылки на проект
 
-IP 51.250.70.228
+IP 158.160.115.30
 
 Frontend https://eevgenushka.nomoreparties.co
 Backend https://api.eevgenushka.nomoreparties.co

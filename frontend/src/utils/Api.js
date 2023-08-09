@@ -8,14 +8,14 @@ class Api {
       return res.json();
     }
     return Promise.reject(`Ошибка: ${res.status}`);
-    }
+  }
 
   getInitialCards() {
     return fetch(`${this._url}/cards`, {
       method: "GET",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       }
     }).then((res) => this._getResponseData(res));
   }
@@ -25,22 +25,22 @@ class Api {
       method: "GET",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+     }
     }).then((res) => this._getResponseData(res));
   }
 
-  editMyProfile(data) {
+  editMyProfile(data) { 
     return fetch(`${this._url}/users/me`, {
       method: "PATCH",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name: data.name,
         about: data.about,
- }),
+ }), 
     }).then((res) => this._getResponseData(res));
   }
 
@@ -49,7 +49,7 @@ class Api {
       method: "POST",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ name, link }),
     }).then((res) => this._getResponseData(res));
@@ -60,7 +60,7 @@ class Api {
       method: "PUT",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       }
     }).then((res) => this._getResponseData(res));
   }
@@ -70,21 +70,21 @@ class Api {
       method: "DELETE",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       }
     }).then((res) => this._getResponseData(res));
   }
 
   changeLikeCardStatus(cardId, isLiked) {
 		return isLiked ? this.setLikeCard(cardId) : this.removeLikeCard(cardId)
-  }
+}
 
   deleteCard(cardId) {
     return fetch(`${this._url}/cards/${cardId}`, {
       method: "DELETE",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       }
     }).then((res) => this._getResponseData(res));
   }
@@ -94,8 +94,8 @@ class Api {
       method: "PATCH",
       headers: {
         'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-        'Content-Type': 'application/json'
-      },
+        'Content-Type': 'application/json',
+     },
       body: JSON.stringify({ avatar: data.avatar }),
     }).then((res) => this._getResponseData(res));
   }

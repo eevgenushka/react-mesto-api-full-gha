@@ -16,7 +16,6 @@ const createUser = (req, res, next) => {
     email,
     password,
   } = req.body;
-
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name,
@@ -26,13 +25,12 @@ const createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      const { _id } = user;
       res.status(201).send({
         email: user.email,
         name: user.name,
         about: user.about,
         avatar: user.avatar,
-        _id,
+        _id: user._id,
       });
     })
     .catch((err) => {
@@ -48,7 +46,6 @@ const createUser = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', {
@@ -64,26 +61,23 @@ const getUsers = (req, res, next) => {
     .then((users) => {
       res.send({ users });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные'));
-        return;
-      }
-      next(err);
-    });
+    .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user)
+  const { userId } = req.user;
+  User.findById(userId)
     .then((user) => {
-      res.send(user);
+      if (user) return res.send(user);
+
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные'));
-        return;
+        next(new BadRequestError('Передан некорректный id'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
@@ -92,35 +86,27 @@ const getUser = (req, res, next) => {
 
   User.findById(userId)
     .then((user) => {
-      if (user) {
-        res.send({ user });
-      } else {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
-      }
+      if (user) return res.send(user);
+      throw new NotFoundError('Пользователь по указанному _id не найден');
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Передан некорректный id'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
-  const { userId } = req.user;
+  const opts = { runValidators: true, new: true };
 
-  User.findByIdAndUpdate(
-    userId,
-    {
-      name,
-      about,
-    },
-    {
-      new: true,
-      runValidators: true,
-    },
-  )
+  User.findByIdAndUpdate(req.user._id, { name, about }, opts)
     .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь по указанному _id не найден');
-      }
-      res.send(user);
+      if (user) return res.send(user);
+
+      throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -134,10 +120,11 @@ const updateUser = (req, res, next) => {
 const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const { userId } = req.user;
-
   User.findByIdAndUpdate(
     userId,
-    { avatar },
+    {
+      avatar,
+    },
     {
       new: true,
       runValidators: true,
@@ -145,12 +132,15 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (user) return res.send(user);
-
-      throw new AlreadyExistError('Пользователь с таким id не найден');
+      throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при обновлении профиля пользователя',
+          ),
+        );
       } else {
         next(err);
       }

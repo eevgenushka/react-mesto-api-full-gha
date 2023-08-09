@@ -34,6 +34,24 @@ function App() {
   const [isInfoTooltipPopupOpen, setIsInfoTooltipPopupOpen] = useState(false);
   const navigate = useNavigate();
 
+  function сheckTocken() { 
+    const jwt = localStorage.getItem("jwt"); 
+    if (jwt) { 
+      auth 
+       .getToken(jwt) 
+        .then((res) => { 
+          if (res) { 
+            setLoggedIn(true); 
+            navigate('/', { replace: true }); 
+            setEmail(res.email); 
+          } 
+        }) 
+        .catch((err) => { 
+         console.error(err); 
+        }); 
+    } 
+  } 
+
   useEffect(() => {
     loggedIn &&
     Promise.all([api.getMyProfile(), api.getInitialCards()])
@@ -44,151 +62,136 @@ function App() {
        .catch((err) => console.log(err));
 
    сheckTocken(); 
-   //eslint-disable-next-line react-hooks/exhaustive-deps
+   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loggedIn]); 
   
-  function onLogin(email, password) {
-    auth
-      .login(email, password)
-      .then((res) => {
-        localStorage.setItem("jwt", res.token);
-        setLoggedIn(true);
-        setEmail(email);
-        navigate('/', { replace: true });
-      })
-      .catch(() => {
-        setInfoTooltipIcon(fail);
-        setInfoTooltipText("Что-то пошло не так! Попробуйте ещё раз.");
-      })
-  }
 
-  function onRegister(email, password) {
-    auth
-      .register(email, password)
-      .then(() => {
-        setInfoTooltipIcon(success);
-        setInfoTooltipText("Вы успешно зарегистрировались!");
-        navigate('/sign-in', { replace: true });
-      })
-      .catch(() => {
-        setInfoTooltipIcon(fail);
-        setInfoTooltipText("Что-то пошло не так! Попробуйте ещё раз.");
-      })
-      .finally(handleInfoTooltip());
-  }
+  function onLogin(email, password) { 
+    auth 
+      .login(email, password) 
+      .then((res) => { 
+        localStorage.setItem("jwt", res.token); 
+        setLoggedIn(true); 
+        setEmail(email); 
+        navigate('/', { replace: true }); 
+      }) 
+     .catch(() => { 
+        setInfoTooltipIcon(fail); 
+        setInfoTooltipText("Что-то пошло не так! Попробуйте ещё раз."); 
+      }) 
+  } 
 
-  function сheckTocken() {
-    const jwt = localStorage.getItem("jwt");
-    if (jwt) {
-      auth
-        .getToken(jwt)
-        .then((res) => {
-          if (res) {
-            setLoggedIn(true);
-            navigate('/', { replace: true });
-            setEmail(res.email);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-  }
+  function onRegister(email, password) { 
+    auth 
+      .register(email, password) 
+      .then(() => { 
+        setInfoTooltipIcon(success); 
+        setInfoTooltipText("Вы успешно зарегистрировались!"); 
+        navigate('/sign-in', { replace: true }); 
+      }) 
+     .catch(() => { 
+        setInfoTooltipIcon(fail); 
+        setInfoTooltipText("Что-то пошло не так! Попробуйте ещё раз."); 
+      }) 
+      .finally(handleInfoTooltip()); 
+  } 
 
-  function onSignOut() {
-    localStorage.removeItem("jwt");
-    setLoggedIn(false);
-    navigate('/sign-in', { replace: true });
-  }
 
-  function handleCardClick(card) {
-    setSelectedCard(card);
-  }
+  function onSignOut() { 
+    localStorage.removeItem("jwt"); 
+    setLoggedIn(false); 
+    navigate('/sign-in', { replace: true }); 
+  } 
 
-  function handleEditAvatarClick() {
-    setEditAvatarPopupOpened(true);
-  }
+  function handleCardClick(card) { 
+    setSelectedCard(card); 
+  } 
 
-  function handleAddPlaceClick() {
-    setAddPlacePopupOpened(true);
-  }
+  function handleEditAvatarClick() { 
+    setEditAvatarPopupOpened(true); 
+  } 
 
-  function handleEditProfileClick() {
-    setEditProfileOpened(true);
-  }
+  function handleAddPlaceClick() { 
+    setAddPlacePopupOpened(true); 
+  } 
 
-  function handleInfoTooltip() {
-    setIsInfoTooltipPopupOpen(true);
-  }
+  function handleEditProfileClick() { 
+    setEditProfileOpened(true); 
+  } 
 
-  function closeAllPopups() {
-    setEditAvatarPopupOpened(false);
-    setAddPlacePopupOpened(false);
-    setEditProfileOpened(false);
-    setIsInfoTooltipPopupOpen(false);
-    setSelectedCard(null);
-  }
-  
-	function handleCardLike(card) {
-    const isLiked = card.likes.some(i => i === currentUser._id);
-    api
-      .changeLikeCardStatus(card._id, !isLiked)
-			.then((newCard) => {
-        setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
-      })
-      .catch((err) => console.log(err));
-  }
-  
-  function handleCardDelete(card) {
-    setIsLoading(true);
-    api
-      .deleteCard(card._id)
-      .then(() => {
-        setCards((state) => state.filter((c) => c._id !== card._id));
-      })
-      .then(() => closeAllPopups())
-      .catch((err) => console.log(err));
-  }
+  function handleInfoTooltip() { 
+    setIsInfoTooltipPopupOpen(true); 
+  } 
 
-  function handleAddPlaceSubmit({name,link}) {
-    setIsLoading(true);
-    api
-      .setNewCard({name, link})
-      .then((newCard) => setCards([newCard, ...cards]))
-      .then(() => closeAllPopups())
-      .catch((err) => console.log(err))
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }
+  function closeAllPopups() { 
+    setEditAvatarPopupOpened(false); 
+    setAddPlacePopupOpened(false); 
+    setEditProfileOpened(false); 
+    setIsInfoTooltipPopupOpen(false); 
+    setSelectedCard(null); 
+  } 
 
-  function handleUpdateUser(newUser) {
-    setIsLoading(true);
-    api
-      .editMyProfile(newUser)
+	function handleCardLike(card) { 
+   const isLiked = card.likes.some(i => i === currentUser._id); 
+    api 
+      .changeLikeCardStatus(card._id, !isLiked) 
+			.then((newCard) => { 
+       setCards((state) => state.map((c) => c._id === card._id ? newCard : c)); 
+      }) 
+      .catch((err) => console.log(err)); 
+  } 
+
+  function handleCardDelete(card) { 
+    setIsLoading(true); 
+    api 
+      .deleteCard(card._id) 
+      .then(() => { 
+        setCards((state) => state.filter((c) => c._id !== card._id)); 
+      }) 
+      .then(() => closeAllPopups()) 
+      .catch((err) => console.log(err)); 
+  } 
+
+  function handleAddPlaceSubmit({name,link}) { 
+    setIsLoading(true); 
+    api 
+      .setNewCard({name, link}) 
+      .then((newCard) => setCards([newCard, ...cards])) 
+      .then(() => closeAllPopups()) 
+      .catch((err) => console.log(err)) 
+      .finally(() => { 
+        setIsLoading(false); 
+      }); 
+  } 
+
+  function handleUpdateUser(newName) {
+    setIsLoading(true); 
+    api 
+      .editMyProfile(newName)
       .then((data) => {
         setCurrentUser(data);
+        closeAllPopups()
       })
-      .then(() => closeAllPopups())
-      .catch((err) => console.log(err))
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }
+      .catch((err) => console.log(err)) 
+      .finally(() => { 
+        setIsLoading(false); 
+      }); 
+  } 
 
   function handleUpdateAvatar(avatar) {
-    setIsLoading(true);
-    api
+    setIsLoading(true); 
+    api 
       .setNewAvatar(avatar)
       .then((data) => {
         setCurrentUser(data);
-      })
-      .then(() => closeAllPopups())
-      .catch((err) => console.log(err))
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }
+        closeAllPopups()
+      }) 
+      .catch((err) => console.log(err)) 
+      .finally(() => { 
+        setIsLoading(false); 
+      }); 
+  } 
 
   return (
     <CurrentUserContext.Provider value={currentUser}>

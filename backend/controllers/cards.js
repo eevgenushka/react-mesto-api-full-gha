@@ -7,9 +7,10 @@ const SUCCESS = 200;
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
+  const { userId } = req.user;
 
-  Cards.create({ name, link, owner: req.user._id })
-    .then((card) => res.send(card))
+  Cards.create({ name, link, owner: userId })
+    .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании карты.'));
@@ -22,38 +23,41 @@ const createCard = (req, res, next) => {
 const getCards = (req, res, next) => {
   Cards.find({})
     .then((cards) => {
-      res.send(cards);
+      res.send({ data: cards });
     })
     .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  Cards.findById(req.params.cardId)
+  const { id: cardId } = req.params;
+  const { userId } = req.user;
+
+  Cards
+    .findById({
+      _id: cardId,
+    })
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка по указанному _id не найдена.');
       }
-      if (!card.owner.equals(req.user._id)) {
+      const { owner: cardOwnerId } = card;
+      if (cardOwnerId.valueOf() !== userId) {
         throw new NoRightsError('Невозможно удалить карту с другим _id пользователя.');
       }
-      Cards.deleteOne(card)
-        .then(() => {
-          res.status(SUCCESS).send(card);
-        })
-        .catch(next);
+      return Cards.findByIdAndDelete(cardId);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные.'));
-      } else {
-        next(err);
+    .then((deletedCard) => {
+      if (!deletedCard) {
+        throw new NotFoundError('Переданы некорректные данные.');
       }
-    });
+      res.send({ data: deletedCard });
+    })
+    .catch(next);
 };
 
 const likeCard = (req, res, next) => {
   const { cardId } = req.params;
-  const userId = req.user._id;
+  const { userId } = req.user;
 
   Cards.findByIdAndUpdate(
     cardId,
@@ -64,7 +68,7 @@ const likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (card) {
-        return res.status(SUCCESS).send(card);
+        return res.status(SUCCESS).send({ data: card });
       }
       return next(new NotFoundError('Запрашиваемая карточка не найдена.'));
     })
@@ -78,7 +82,7 @@ const likeCard = (req, res, next) => {
 
 const dislikeCard = (req, res, next) => {
   const { cardId } = req.params;
-  const userId = req.user._id;
+  const { userId } = req.user;
 
   Cards.findByIdAndUpdate(
     cardId,
@@ -89,7 +93,7 @@ const dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (card) {
-        return res.send(card);
+        return res.send({ data: card });
       }
       return next(new NotFoundError('Запрашиваемая карточка не найдена.'));
     })

@@ -25,12 +25,13 @@ const createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
+      const { _id } = user;
       res.status(201).send({
-        email: user.email,
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        _id: user._id,
+        email,
+        name,
+        about,
+        avatar,
+        _id,
       });
     })
     .catch((err) => {
@@ -46,12 +47,20 @@ const createUser = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key', {
-        expiresIn: '7d',
-      });
-      res.send({ message: 'Авторизация прошла успешно', token });
+
+  User.findUserByCredentials(email, password)
+    .then(({ _id: userId }) => {
+      if (userId) {
+        const token = jwt.sign(
+          { userId },
+          NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
+          { expiresIn: '7d' },
+        );
+
+        return res.send({ token });
+      }
+
+      throw new BadRequestError('Неправильные почта или пароль');
     })
     .catch(next);
 };
@@ -66,11 +75,12 @@ const getUsers = (req, res, next) => {
 
 const getCurrentUser = (req, res, next) => {
   const { userId } = req.user;
+
   User.findById(userId)
     .then((user) => {
       if (user) return res.send(user);
 
-      throw new NotFoundError('Пользователь по указанному _id не найден');
+      throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -82,9 +92,9 @@ const getCurrentUser = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  const { userId } = req.params;
+  const { id } = req.params;
 
-  User.findById(userId)
+  User.findById(id)
     .then((user) => {
       if (user) return res.send(user);
       throw new NotFoundError('Пользователь по указанному _id не найден');
@@ -100,17 +110,31 @@ const getUser = (req, res, next) => {
 
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
-  const opts = { runValidators: true, new: true };
+  const { userId } = req.user;
 
-  User.findByIdAndUpdate(req.user._id, { name, about }, opts)
+  User.findByIdAndUpdate(
+    userId,
+    {
+      name,
+      about,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
     .then((user) => {
       if (user) return res.send(user);
 
       throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные'));
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при обновлении профиля',
+          ),
+        );
       } else {
         next(err);
       }
@@ -120,6 +144,7 @@ const updateUser = (req, res, next) => {
 const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const { userId } = req.user;
+
   User.findByIdAndUpdate(
     userId,
     {
@@ -132,6 +157,7 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (user) return res.send(user);
+
       throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {

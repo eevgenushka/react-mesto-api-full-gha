@@ -34,30 +34,12 @@ function App() {
   const [isInfoTooltipPopupOpen, setIsInfoTooltipPopupOpen] = useState(false);
   const navigate = useNavigate();
 
-  function сheckTocken() { 
-    const jwt = localStorage.getItem("jwt"); 
-    if (jwt) { 
-      auth 
-       .getToken(jwt) 
-        .then((res) => { 
-          if (res) { 
-            setLoggedIn(true); 
-            navigate('/', { replace: true }); 
-            setEmail(res.email); 
-          } 
-        }) 
-        .catch((err) => { 
-         console.error(err); 
-        }); 
-    } 
-  } 
-
   useEffect(() => {
     loggedIn &&
     Promise.all([api.getMyProfile(), api.getInitialCards()])
        .then(([userData, initialCards]) => {
          setCurrentUser(userData);
-      setCards(initialCards);
+      setCards(initialCards.data);
       })
        .catch((err) => console.log(err));
 
@@ -97,6 +79,24 @@ function App() {
       .finally(handleInfoTooltip()); 
   } 
 
+  function сheckTocken() { 
+    const jwt = localStorage.getItem("jwt"); 
+    if (jwt) { 
+      auth 
+       .getToken(jwt) 
+        .then((res) => { 
+          if (res) { 
+           setLoggedIn(true); 
+            navigate('/', { replace: true }); 
+          setEmail(res.email); 
+            setCurrentUser(res);
+          } 
+        }) 
+        .catch((err) => { 
+         console.error(err); 
+        }); 
+    } 
+  } 
 
   function onSignOut() { 
     localStorage.removeItem("jwt"); 
@@ -132,15 +132,16 @@ function App() {
     setSelectedCard(null); 
   } 
 
-	function handleCardLike(card) { 
-   const isLiked = card.likes.some(i => i === currentUser._id); 
-    api 
-      .changeLikeCardStatus(card._id, !isLiked) 
-			.then((newCard) => { 
-       setCards((state) => state.map((c) => c._id === card._id ? newCard : c)); 
-      }) 
-      .catch((err) => console.log(err)); 
-  } 
+  function handleCardLike(card) {
+    const isLiked = card.likes.some((user) => user === currentUser._id);
+    (isLiked ? api.removeLikeCard(card._id) : api.setLikeCard(card._id, true))
+      .then((newCard) => {
+        setCards((state) =>
+          state.map((c) => (c._id === newCard.data._id ? newCard.data : c))
+        );
+      })
+      .catch((err) => console.log(err));
+  }
 
   function handleCardDelete(card) { 
     setIsLoading(true); 
@@ -157,7 +158,7 @@ function App() {
     setIsLoading(true); 
     api 
       .setNewCard({name, link}) 
-      .then((newCard) => setCards([newCard, ...cards])) 
+      .then((newCard) => setCards([newCard.data, ...cards])) 
       .then(() => closeAllPopups()) 
       .catch((err) => console.log(err)) 
       .finally(() => { 

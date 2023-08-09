@@ -35,9 +35,9 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    loggedIn &&
     Promise.all([api.getMyProfile(), api.getInitialCards()])
        .then(([userData, initialCards]) => {
-      console.log(initialCards);
          setCurrentUser(userData);
       setCards(initialCards);
       })
@@ -45,7 +45,7 @@ function App() {
 
    сheckTocken(); 
    //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, [loggedIn]); 
   
   function onLogin(email, password) {
     auth
@@ -162,16 +162,12 @@ function App() {
       });
   }
 
-  function handleUpdateUser({name, about}) {
+  function handleUpdateUser(newUser) {
     setIsLoading(true);
     api
-      .editMyProfile({name, about})
-      .then((res) => {
-        setCurrentUser({
-          name: res.name,
-          about: res.about,
-          avatar: res.avatar,
-        });
+      .editMyProfile(newUser)
+      .then((data) => {
+        setCurrentUser(data);
       })
       .then(() => closeAllPopups())
       .catch((err) => console.log(err))
@@ -180,12 +176,12 @@ function App() {
       });
   }
 
-  function handleUpdateAvatar({avatar}) {
+  function handleUpdateAvatar(avatar) {
     setIsLoading(true);
     api
-      .setNewAvatar({avatar})
-      .then((res) => {
-        setCurrentUser(res);
+      .setNewAvatar(avatar)
+      .then((data) => {
+        setCurrentUser(data);
       })
       .then(() => closeAllPopups())
       .catch((err) => console.log(err))

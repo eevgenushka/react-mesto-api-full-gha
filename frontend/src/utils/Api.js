@@ -102,7 +102,7 @@ deleteCard(cardId) {
 } 
 
 const api = new Api({ 
-	url: 'http://localhost:3000', 
+	url: 'https://api.eevgenushka.nomoreparties.co', 
 }); 
 
 export default api; 

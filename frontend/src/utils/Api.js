@@ -102,7 +102,7 @@ class Api {
 } 
 
 const api = new Api({ 
-	url: 'https://api.eevgenushka.nomoreparties.co',
+	url: 'http://localhost:3000',
 }); 
 
 export default api; 

@@ -165,7 +165,6 @@ function App() {
         setIsLoading(false); 
       }); 
   } 
-
   function handleUpdateUser(newName) {
     setIsLoading(true); 
     api 
@@ -194,7 +193,7 @@ function App() {
       }); 
   } 
 
-  return (
+return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
         <Routes>

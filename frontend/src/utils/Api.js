@@ -75,19 +75,19 @@ class Api {
     }).then((res) => this._getResponseData(res)); 
   } 
 
-//  changeLikeCardStatus(cardId, isLiked) { 
-// 		return isLiked ? this.setLikeCard(cardId) : this.removeLikeCard(cardId) 
-//  } 
+/*  changeLikeCardStatus(cardId, isLiked) { 
+		return isLiked ? this.setLikeCard(cardId) : this.removeLikeCard(cardId) 
+} */
 
-deleteCard(cardId) { 
-  return fetch(`${this._url}/cards/${cardId}`, { 
-    method: "DELETE", 
-    headers: {
-      'authorization': `Bearer ${localStorage.getItem('jwt')}`,
-      'Content-Type': 'application/json'
-    }
-  }).then((res) => this._getResponseData(res)); 
-} 
+  deleteCard(cardId) { 
+    return fetch(`${this._url}/cards/${cardId}`, { 
+      method: "DELETE", 
+      headers: {
+        'authorization': `Bearer ${localStorage.getItem('jwt')}`,
+        'Content-Type': 'application/json'
+      }
+    }).then((res) => this._getResponseData(res)); 
+  } 
 
   setNewAvatar(data) {
     return fetch(`${this._url}/users/me/avatar`, { 
@@ -102,7 +102,7 @@ deleteCard(cardId) {
 } 
 
 const api = new Api({ 
-	url: 'https://api.eevgenushka.nomoreparties.co', 
+	url: 'https://api.eevgenushka.nomoreparties.co',
 }); 
 
 export default api; 

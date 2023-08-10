@@ -8,25 +8,24 @@ const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const AlreadyExistError = require('../errors/AlreadyExistError');
 
-const createUser = (req, res, next) => {
+function createUser(req, res, next) {
   const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
+    email, password, name, about, avatar,
   } = req.body;
-  bcrypt.hash(password, 10)
+
+  bcrypt
+    .hash(password, 10)
     .then((hash) => User.create({
+      email,
+      password: hash,
       name,
       about,
       avatar,
-      email,
-      password: hash,
     }))
     .then((user) => {
       const { _id } = user;
-      res.status(201).send({
+
+      return res.status(201).send({
         email,
         name,
         about,
@@ -36,16 +35,24 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        next(new AlreadyExistError('Пользователь с данным email уже существует'));
+        next(
+          new AlreadyExistError(
+            'Пользователь с таким электронным адресом уже зарегистрирован',
+          ),
+        );
       } else if (err.name === 'ValidationError') {
-        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при регистрации пользователя',
+          ),
+        );
       } else {
         next(err);
       }
     });
-};
+}
 
-const login = (req, res, next) => {
+function login(req, res, next) {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -63,17 +70,34 @@ const login = (req, res, next) => {
       throw new BadRequestError('Неправильные почта или пароль');
     })
     .catch(next);
-};
+}
 
-const getUsers = (req, res, next) => {
+function getUsers(req, res, next) {
   User.find({})
-    .then((users) => {
-      res.send({ users });
-    })
+    .then((users) => res.send({ users }))
     .catch(next);
-};
+}
 
-const getCurrentUser = (req, res, next) => {
+function getUser(req, res, next) {
+  const { id } = req.params;
+
+  User.findById(id)
+
+    .then((user) => {
+      if (user) return res.send(user);
+
+      throw new NotFoundError('Пользователь с таким id не найден');
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Передан некорректный id'));
+      } else {
+        next(err);
+      }
+    });
+}
+
+function getCurrentUser(req, res, next) {
   const { userId } = req.user;
 
   User.findById(userId)
@@ -89,26 +113,9 @@ const getCurrentUser = (req, res, next) => {
         next(err);
       }
     });
-};
+}
 
-const getUser = (req, res, next) => {
-  const { id } = req.params;
-
-  User.findById(id)
-    .then((user) => {
-      if (user) return res.send(user);
-      throw new NotFoundError('Пользователь по указанному _id не найден');
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequestError('Передан некорректный id'));
-      } else {
-        next(err);
-      }
-    });
-};
-
-const updateUser = (req, res, next) => {
+function updateUser(req, res, next) {
   const { name, about } = req.body;
   const { userId } = req.user;
 
@@ -139,9 +146,9 @@ const updateUser = (req, res, next) => {
         next(err);
       }
     });
-};
+}
 
-const updateAvatar = (req, res, next) => {
+function updateAvatar(req, res, next) {
   const { avatar } = req.body;
   const { userId } = req.user;
 
@@ -171,7 +178,7 @@ const updateAvatar = (req, res, next) => {
         next(err);
       }
     });
-};
+}
 
 module.exports = {
   createUser,

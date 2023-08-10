@@ -79,13 +79,13 @@ function getUsers(req, res, next) {
 }
 
 function getUser(req, res, next) {
-  const { id } = req.params;
-
-  User.findById(id)
+  const { userId } = req.params;
+  User.findById(userId)
 
     .then((user) => {
-      if (user) return res.send(user);
-
+      if (user) {
+        return res.send(user);
+      }
       throw new NotFoundError('Пользователь с таким id не найден');
     })
     .catch((err) => {
